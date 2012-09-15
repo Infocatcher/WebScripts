@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="author" content="Infocatcher" />
+	<meta name="copyright" content="&copy; Infocatcher 2011-2012" />
+	<title>Filter test</title>
+	<style type="text/css">
+	/*<![CDATA[*/
+		html, body { margin: 0; background-color: white; }
+		html { padding: 0; }
+		body { padding: 8px; color: black; font: 1em Verdana,Arial,Helvetica,sans-serif; }
+
+		.filterHighlight { color: black; background: yellow; }
+		.jsDisabled .forJsEnabled,
+		.jsEnabled .forJsDisabled {
+			display: none;
+		}
+	/*]]>*/
+	</style>
+</head>
+<body class="jsDisabled">
+<script type="text/javascript">
+	document.body.className = "jsEnabled";
+</script>
+<div id="content">
+
+<table width="100%">
+	<tr>
+		<td>
+			<input id="filter" type="text" /><input class="forJsEnabled" onclick="this.previousSibling.__listFilter.reset();" type="button" value="X" />
+		</td>
+		<td>
+			<input id="filter2" type="text" /><input class="forJsEnabled" onclick="this.previousSibling.__listFilter.reset();" type="button" value="X" />
+		</td>
+	</tr>
+	<tr>
+		<td style="width: 50%; vertical-align: top;">
+			<ul id="list">
+				<li>Test <strong>qw<em><ins>ert</ins></em>y</strong>asd test</li>
+				<li>Test <strong><i>asd</i>fgh</strong>jkl<span><span><span><span>&lt;deep&gt;</span></span></span></span></li>
+				<li>Qwerty Asdf</li>
+				<li><em>z</em>x<em>c</em>v<em><strong>b</strong></em>nm</li>
+				<li>script: <script type="text/javascript">void 0;</script></li>
+				<li>"&lt;" &amp;nbsp; &gt;</li>
+				<li>[spaces:        ]</li>
+				<li><pre>[spaces:        ]</pre></li>
+				<li>pre: <span style="white-space: pre;">[spaces:        ]</span></li>
+				<li>&amp;nbsp;&nbsp;&gt;</li>
+				<li>йцу<strong>кен</strong></li>
+				<li>фыва<strong>про</strong></li>
+				<li>1) <em><span><strong><em></em>0123</strong>45</span>67</em>89</li>
+				<li>2) 0123456789<em>0123456789</em>0123456789<em>0123456789</em>0123456789</li>
+				<li>3) 0<em>123</em>45<em><ins><strong>6<span>7</span><span>8</span></strong></ins></em>90<em>12</em>34567<em>89012</em>3456<ins>789</ins>0123<em>4567890</em>123</li>
+				<li>4) 0<em>1</em><em>2</em><em>3</em><em>4</em><em>5</em><em>67</em><em><span>8</span></em><em>9</em> 0123456789 0123456789</li>
+				<li>5) 01234567890123456789 0123456789</li>
+				<li>\w \d \D | \s</li>
+				<li><strong>#</strong>12345</li>
+				<li><a href="http://example.com/?qq">http://example.com/</a></li>
+				<li><a href="http://example.net/?ww">example.net</a> (zxc)</li>
+			</ul>
+		</td>
+		<td style="width: 50%; vertical-align: top;">
+			<ul id="list2">
+				<li>&lt;code&gt;</li>
+				<li>/\d|#/</li>
+				<li>/\d|\|/</li>
+				<li>Qwerty</li>
+				<li>Asdfg</li>
+				<li><strong>Q</strong><em><strong>w</strong>e</em>rty</li>
+				<li>0123 45678 9</li>
+			</ul>
+		</td>
+	</tr>
+</table>
+<script type="text/javascript" src="filter.js"></script>
+<script type="text/javascript">
+	new ListFilter("filter", "list").focus();
+	new ListFilter("filter2", "list2");
+</script>
+</div>
+</body>
+</html>
