@@ -76,8 +76,8 @@ var elapsedTime = {
 		var text = node.textContent || node.innerText;
 		node.__origTime = " \n(" + (
 			this._offset
-				? "московское время: " + text + this._tz
-				: "время московское" + this._tz
+				? "РјРѕСЃРєРѕРІСЃРєРѕРµ РІСЂРµРјСЏ: " + text + this._tz
+				: "РІСЂРµРјСЏ РјРѕСЃРєРѕРІСЃРєРѕРµ" + this._tz
 		) + ")";
 		var time = this.parseDateString(text);
 		if(time && this._offset) {
@@ -112,7 +112,7 @@ var elapsedTime = {
 	},
 	getElapsedTime: function(dt) { // time delta in seconds
 		if(dt < 0)
-			return "0 секунд назад";
+			return "0 СЃРµРєСѓРЅРґ РЅР°Р·Р°Рґ";
 
 		var time = "";
 
@@ -120,34 +120,34 @@ var elapsedTime = {
 		dt -= years*31536000;
 		var months = Math.floor(dt/2592000);
 		if(years)
-			time += this.pluralNum(years, "год", "года", "лет");
+			time += this.pluralNum(years, "РіРѕРґ", "РіРѕРґР°", "Р»РµС‚");
 		if(months)
-			time += (time ? " " : "") + this.pluralNum(months, "месяц", "месяца", "месяцев");
+			time += (time ? " " : "") + this.pluralNum(months, "РјРµСЃСЏС†", "РјРµСЃСЏС†Р°", "РјРµСЃСЏС†РµРІ");
 		if(!years) {
 			dt -= months*2592000;
 			var days = Math.floor(dt/86400);
 			if(days)
-				time += (time ? " " : "") + this.pluralNum(days, "день", "дня", "дней");
+				time += (time ? " " : "") + this.pluralNum(days, "РґРµРЅСЊ", "РґРЅСЏ", "РґРЅРµР№");
 			if(!months && days <= 3) {
 				dt -= days*86400;
 				var hours = Math.floor(dt/3600);
 				if(hours)
-					time += (time ? " " : "") + this.pluralNum(hours, "час", "часа", "часов");
+					time += (time ? " " : "") + this.pluralNum(hours, "С‡Р°СЃ", "С‡Р°СЃР°", "С‡Р°СЃРѕРІ");
 				if(!days && hours <= 10) {
 					dt -= hours*3600;
 					var minutes = Math.floor(dt/60);
 					if(minutes)
-						time += (time ? " " : "") + this.pluralNum(minutes, "минута", "минуты", "минут");
+						time += (time ? " " : "") + this.pluralNum(minutes, "РјРёРЅСѓС‚Р°", "РјРёРЅСѓС‚С‹", "РјРёРЅСѓС‚");
 					if(!hours && minutes <= 10) {
 						dt -= minutes*60;
 						var seconds = dt;
 						if(seconds || !minutes)
-							time += (time ? " " : "") + this.pluralNum(seconds, "секунда", "секунды", "секунд");
+							time += (time ? " " : "") + this.pluralNum(seconds, "СЃРµРєСѓРЅРґР°", "СЃРµРєСѓРЅРґС‹", "СЃРµРєСѓРЅРґ");
 					}
 				}
 			}
 		}
-		return time + " назад";
+		return time + " РЅР°Р·Р°Рґ";
 	},
 	pluralNum: function(n, p1, p2, p3) {
 		return n + " " + this.plural(n, p1, p2, p3);
@@ -156,11 +156,11 @@ var elapsedTime = {
 		// https://developer.mozilla.org/en/Localization_and_Plurals#List_of_Plural_Rules
 		var last = n % 10;
 		var last2 = n % 100;
-		if(last == 1 && last2 != 11) // 1 год, 101 год
+		if(last == 1 && last2 != 11) // 1 РіРѕРґ, 101 РіРѕРґ
 			return p1;
-		if(last >= 2 && last <= 4 && (last2 < 12 || last2 > 14)) // 2 года, 102 года
+		if(last >= 2 && last <= 4 && (last2 < 12 || last2 > 14)) // 2 РіРѕРґР°, 102 РіРѕРґР°
 			return p2;
-		return p3; // 5 лет
+		return p3; // 5 Р»РµС‚
 	},
 	hoveredNode: null,
 	updateNodeTwice: function(node) {
