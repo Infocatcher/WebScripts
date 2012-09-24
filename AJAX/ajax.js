@@ -1,5 +1,5 @@
-// (c) Infocatcher 2009, 2011
-// version 0.2.0 - 2011-05-20
+// (c) Infocatcher 2009, 2011-2012
+// version 0.2.1 - 2012-09-24
 
 // Usage:
 // var ajax = new Ajax(maxActiveRequests);
@@ -23,18 +23,18 @@ function Ajax(maxActiveRequests) {
 	this.requests = [];
 }
 Ajax.prototype = {
-	post: function(uri, data, callback, callbackContext) {
+	post: function(uri, data, callback, callbackContext, args) {
 		return this.requestArgs("POST", arguments);
 	},
-	get: function(uri, data, callback, callbackContext) {
+	get: function(uri, data, callback, callbackContext, args) {
 		return this.requestArgs("GET", arguments);
 	},
-	head: function(uri, data, callback, callbackContext) {
+	head: function(uri, data, callback, callbackContext, args) {
 		return this.requestArgs("HEAD", arguments);
 	},
 	abort: function() {
 		var requests = this.requests;
-		for(var i = 0, l = requests.length; i < l; i++)
+		for(var i = 0, l = requests.length; i < l; ++i)
 			if(i in requests)
 				requests[i].abort();
 	},
@@ -45,7 +45,7 @@ Ajax.prototype = {
 	isSuccessCode: function(state) {
 		return state >= 0;
 	},
-	request: function(method, uri, data, callback, callbackContext) {
+	request: function(method, uri, data, callback, callbackContext, args) {
 		// callback: function(request, ok) { ... }
 		// data:     "key=value"
 		if(this.activeRequests >= this.maxActiveRequests) {
@@ -68,7 +68,10 @@ Ajax.prototype = {
 			while(cnt++ < _this.maxActiveRequests && _this.hasQueue())
 				_this.nextRequest();
 			var ok = request.status == (/^https?:/.test(/^\w+:/.test(uri) ? uri : location.href) ? 200 : 0);
-			callback.call(callbackContext || window, request, ok);
+			var callbackArgs = [request, ok];
+			if(args)
+				callbackArgs.push.apply(callbackArgs, args);
+			callback.apply(callbackContext || window, callbackArgs);
 			delete _this.requests[uid];
 			// Madness? No. Memory leaks in stupid IE.
 			request = method = uri = callback = callbackContext = _this = null;
@@ -85,7 +88,7 @@ Ajax.prototype = {
 			catch(e2) {
 			}
 			request.send(data || null);
-			this.activeRequests++;
+			++this.activeRequests;
 		}
 		catch(e) {
 			setTimeout(function() { throw e; }, 0);
