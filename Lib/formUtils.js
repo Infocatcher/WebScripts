@@ -1,5 +1,5 @@
 // (c) Infocatcher 2011-2012
-// version 0.1.5.1 - 2012-05-30
+// version 0.1.5.2 - 2012-11-10
 
 // Dependencies:
 //   eventListener object - eventListener.js
@@ -35,8 +35,14 @@ FormUtils.prototype = {
 			var _this = this;
 			form.submit = function() {
 				var opts = _this.options;
-				if(!("required" in opts) || _this.check())
-					_this.form._submit.apply(this, arguments);
+				if("required" in opts && !_this.check())
+					return;
+				try {
+					form._submit.apply(this, arguments);
+				}
+				catch(e) { // Stupid IE6
+					form._submit();
+				}
 			};
 		}
 		eventListener.add(window, "unload", function() {
