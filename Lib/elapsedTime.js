@@ -4,6 +4,13 @@
 // Dependencies:
 //   eventListener object - eventListener.js
 
+// Usage (in PHP):
+//	<span class="time"><?php echo getDateFromDB(); ?></span>
+//	...
+//	<script type="text/javascript">
+//		elapsedTime.init("<?php echo date('Y-m-d H:i:s P'); ?>");
+//	</script>
+
 var elapsedTime = {
 	timeClass: "time",
 	tolerance: 15*60*1000, // Joke from Nepal :)
