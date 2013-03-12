@@ -1,0 +1,582 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="content-type" content="application/xhtml+xml; charset=utf-8" />
+	<title>Objects Explorer 0.1.0b4</title>
+	<meta name="copyright" content="&copy; Infocatcher 2008, 2010-2012"/>
+	<meta name="author" content="Infocatcher" />
+	<!-- version: 0.1.0b4 - 2012-09-24 -->
+	<!-- [2010-08-27] Bug: javascript: window["0/1"] = 2; void 0; [fixed: 2010-10-11] -->
+	<!-- [2010-10-11] Bug: \ in URI threated as / [fixed: 2011-12-02] -->
+	<style type="text/css">
+	/*<![CDATA[*/
+		html { padding: 0; margin: 0; }
+		body {
+			padding: 10px; margin: 0;
+			color: black; background: white;
+			font: 13px "Courier New", monospace;
+		}
+		:link { text-decoration: none; color: #00c; }
+		:link:hover { text-decoration: underline; background-color: #f4f4ff; }
+		:visited { text-decoration: none; color: #800080; }
+		:visited:hover { text-decoration: underline; background-color: #fff4ff; }
+
+		#header {
+			border-bottom: 2px groove gray;
+			background-color: white;
+
+			position: fixed;
+			top: 0;
+			right: 0;
+			left: 0;
+			padding: 0 8px;
+			z-index: 100;
+		}
+		.headerEntry, .entry { margin: 0; padding: 3px 0 3px 0; }
+		.objectName { font-weight: bold; cursor: pointer; }
+		.objectName:hover { background-color: #f0f0f0; }
+		.objectTypeof { color: gray; }
+		.objectTypeof.object { font-weight: bold; }
+		.objectTypeof:hover { background-color: #f5f5f5; }
+		.error { color: #c33; }
+		.error:hover { background-color: #fff5f5; }
+		.sourceContainer {
+			max-height: 128px; /* 16*8 */
+			overflow: auto;
+			line-height: 16px;
+		}
+		.source {
+			color: #393;
+			white-space: pre;
+			white-space: pre-wrap;
+		}
+		.source:hover { background-color: #f5fff5; }
+	/*]]>*/
+	</style>
+</head>
+<body>
+<div id="content">
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+
+/*
+var __x = {
+	a: { b: 0 },
+	b: 1
+};
+window["00\\000/.\"1"] = { x: __x };
+window["0\"1"] = { x: __x };
+window[".x[\"y\"]"] = { x: __x };
+*/
+
+(function() {
+
+var uneval = typeof window.uneval == "function"
+	? function(o) {
+		try {
+			if(typeof o == "function") // ?
+				return String(o);
+			return window.uneval(o);
+		}
+		catch(e) {
+			return "[uneval error]";
+		}
+	}
+	: function(o, _deepLevel, _time) {
+		if(!_deepLevel)
+			_deepLevel = 0;
+		else if(_deepLevel > 6)
+			return "[depth limit]";
+
+		if(!_time)
+			_time = new Date().getTime();
+		else if(new Date().getTime() - _time > 2000)
+			return "[time limit]";
+
+		if(o === null)
+			return "null";
+		if(o === undefined)
+			return "undefined";
+		var t = typeof o;
+		if(t == "string")
+			return '"' + o + '"';
+		if(t == "number")
+			return o;
+		if(t == "function")
+			return (_deepLevel ? "" : "(") + o.toString().replace(/[\n\r][\t ]*/g, "") + (_deepLevel ? "" : ")");
+		var s;
+		try {
+			s = Object.prototype.toString.call(o);
+		}
+		catch(e) {
+		}
+		if(o instanceof Array || s == "[object Array]") {
+			var res = [];
+			for(var i = 0, len = o.length; i < len; ++i)
+				res.push(uneval(o[i], _deepLevel + 1, _time));
+			return "[" + res.join(", ") + "]";
+		}
+		if(o instanceof RegExp || s == "[object RegExp]")
+			return o;
+		if(o instanceof Object || s == "[object Object]") {
+			var res = [], v;
+			try {
+				for(var p in o) {
+					try {
+						v = o[p];
+					}
+					catch(e) {
+						v = "[access error]";
+					}
+					res.push(p + ": " + uneval(v, _deepLevel + 1, _time));
+				}
+			}
+			catch(e) {
+				return "[iteration error]";
+			}
+			return (_deepLevel ? "" : "(") + "{" + res.join(", ") + "}" + (_deepLevel ? "" : ")");
+		}
+		try {
+			return "" + o;
+		}
+		catch(e) {
+			return "[toString error]";
+		}
+	};
+
+var objectsExplorer = {
+	portable: false,
+	maxLength: 200,
+
+	ids: {
+		header: "header",
+		entries: "entries"
+	},
+	classes: {
+		objectNavigationLink: "objectNavigationLink",
+		count: "count",
+
+		entry: "entry",
+		invalidEntry: "invalidEntry",
+		headerEntry: "headerEntry",
+		separator: "separator",
+
+		objectName: "objectName",
+		equalMark: "equalMark",
+		objectTypeof: "objectTypeof",
+		objectValueLink: "objectValueLink",
+
+		sourceContainer: "sourceContainer",
+		source: "source",
+
+		error: "error"
+	},
+
+	_initialized: false,
+	_parsedHash: null,
+
+	startup: function() {
+		this.init();
+		if(this.portable)
+			return this.parseDefault();
+		if(location.hash)
+			return this.parseObjectFromHash();
+		return this.parseDefault();
+	},
+	init: function() {
+		if(this._initialized || this.portable)
+			return;
+		this._initialized = true;
+		var _this = this;
+		var upd = function() {
+			_this.parseObjectFromHash();
+		};
+		var ifr = document.createElement("iframe");
+		ifr.style.display = "none";
+		document.documentElement.appendChild(ifr);
+		// "onhashchange" in window; => window.onhashchange === undefined
+		if("onhashchange" in (ifr.contentWindow || window)) {
+			if("addEventListener" in window)
+				window.addEventListener("hashchange", upd, false);
+			else
+				window.attachEvent("onhashchange", upd);
+		}
+		else {
+			setInterval(upd, 50);
+		}
+		document.documentElement.removeChild(ifr);
+	},
+
+	parseObjectFromHash: function() {
+		if(this.getHash() != this._parsedHash)
+			this.parseObject(null, this.hashToArray()) || this.parseDefault();
+	},
+	parseDefault: function() {
+		return this.parseObject(window, ["window"]);
+	},
+	getHash: function() {
+		//return /#(.*)$/.test(location.href) ? RegExp.$1 : "";
+		var hash = location.hash.substr(1);
+		try {
+			hash = decodeURIComponent(hash);
+		}
+		catch(e) {
+		}
+		return hash;
+	},
+	hashToArray: function() {
+		// window["ab.cd"].x["a-0"]["a-1"]
+		var pNames = [];
+		var hash = this.getHash()
+			.replace(/&5c;/g, "\\")
+			.replace(/&26;/g, "&");
+		if(!hash)
+			return pNames;
+		var reProp = /^\.([a-z_$][\w$]*)/i;
+		var reBrackets = /^\[('|")((\\\1|[^\1])+)\1\]/;
+		if(/^[a-z_$][\w$]*/i.test(hash))
+			hash = "." + hash;
+		for(;;) {
+			if(reProp.test(hash)) {
+				pNames.push(RegExp.$1);
+				hash = hash.substr(RegExp.lastMatch.length);
+				continue;
+			}
+			if(reBrackets.test(hash)) {
+				hash = hash.substr(RegExp.lastMatch.length);
+				pNames.push(
+					RegExp.$2
+						.replace(
+							/(\\*)\\"/g,
+							function(s, bs, chr) {
+								return bs.length % 2 == 0
+									? bs + '"'
+									: s;
+							}
+						)
+						.replace(
+							/\\{2,}/g, // \\ -> \
+							function(bs) {
+								return bs.length % 2 == 0
+									? new Array(bs.length/2 + 1).join("\\")
+									: new Array((bs.length - 1)/2 + 1).join("\\") + "\\";
+							}
+						)
+				);
+				continue;
+			}
+			break;
+		}
+		return pNames;
+	},
+	arrayToHash: function(pNames) {
+		return this.getObjectName(pNames, true)
+			.replace(/&/g, "&26;")
+			.replace(/\\/g, "&5c;");
+	},
+	hasSelection: function() {
+		var sel = window.getSelection && window.getSelection()
+			|| document.getSelection && document.getSelection()
+			|| document.selection && document.selection.createRange && document.selection.createRange().text;
+		return !!("" + sel);
+	},
+	isSimpleName: function(name) {
+		return /^[a-z_$][\w$]*$/i.test(name);
+	},
+	getObjectName: function(pNames) {
+		var res = ""
+		for(var i = 0, l = pNames.length; i < l; ++i) {
+			var name = pNames[i];
+			res += this.isSimpleName(name)
+				? (i == 0 ? "" : ".") + name
+				: '["' + this.encodeProperty(name) + '"]'
+		}
+		return res;
+	},
+	encodeProperty: function(p) {
+		return p
+			.replace(/\\/g, "\\\\")
+			.replace(/"/g, '\\"');
+	},
+	getLink: function(pVal, o, pNames) {
+		var a = document.createElement("a");
+		a.href = "#" + this.arrayToHash(pNames);
+		var text;
+		try {
+			text = "" + pVal;
+		}
+		catch(e) {
+			text = "[toString error]";
+			a.className = this.classes.error;
+		}
+		if(this.maxLength && text.length > this.maxLength) {
+			a.title = text;
+			text = text.substr(0, this.maxLength) + "\u2026";
+		}
+		if(!text) {
+			var s;
+			try {
+				s = Object.prototype.toString.call(o);
+			}
+			catch(e) {
+			}
+			var t = typeof pVal;
+			if(pVal instanceof Array || s == "[object Array]")
+				text = "[]";
+			else if(t == "string")
+				text = '""';
+			else if(t == "object")
+				text = "{}";
+			else
+				text = "[empty]";
+		}
+		a.appendChild(document.createTextNode(text));
+		a.__o = o;
+		a.__pNames = pNames;
+		var _this = this;
+		a.onclick = function(e) {
+			e = e || window.event;
+			if(
+				typeof e.which == "undefined"
+					? e.button == 0 || e.button == 1
+					: e.button == 0 && e.which == 1
+			) {
+				_this.parseObject(this.__o, this.__pNames);
+				return false;
+			}
+			return true;
+		};
+		return a;
+	},
+	getObject: function(pNames) {
+		var o = window;
+		for(var i = 0, l = pNames.length; i < l; ++i) {
+			var name = pNames[i];
+			if(!(name in o))
+				return undefined;
+			try {
+				o = o[name];
+			}
+			catch(e) {
+				return undefined;
+			}
+		}
+		return o;
+	},
+	addEntry: function(entries, o, p, pNames) {
+		var pNamesNew = pNames.concat(p);
+		var pVal, err = true;
+		try {
+			pVal = o[p];
+			err = false;
+		}
+		catch(e) {
+			pVal = "[access error]";
+		}
+
+		var entry = document.createElement("div");
+		entry.className = this.classes.entry;
+
+		var s = document.createElement("span");
+		s.className = this.classes.objectName;
+		s.appendChild(document.createTextNode(this.getObjectName(pNamesNew)));
+
+		var _this = this;
+		s.onclick = function() {
+			if(_this.hasSelection())
+				return;
+			var pn = this.parentNode;
+
+			if(pn.lastChild.className == _this.classes.sourceContainer) {
+				pn.removeChild(pn.lastChild);
+				return;
+			}
+
+			var a = pn.getElementsByTagName("a");
+			if(!a.length)
+				return;
+			a = a[0];
+			var srcBlock = document.createElement("div");
+			srcBlock.className = _this.classes.sourceContainer;
+			var src = document.createElement("div");
+			src.className = _this.classes.source;
+			src.appendChild(document.createTextNode(uneval(a.__o)));
+			srcBlock.appendChild(src);
+
+			pn.appendChild(srcBlock);
+		};
+
+		entry.appendChild(s);
+
+		entry.appendChild(document.createTextNode(" "));
+		s = document.createElement("span");
+		s.className = this.classes.equalMark;
+		s.appendChild(document.createTextNode("="));
+		entry.appendChild(s);
+		entry.appendChild(document.createTextNode(" "));
+
+		if(err) {
+			var v = document.createElement("span");
+			v.className = this.classes.error;
+			v.appendChild(document.createTextNode(pVal));
+		}
+		else {
+			s = document.createElement("span");
+			s.className = this.classes.objectTypeof;
+			var t = typeof pVal;
+			if(t == "object" && pVal !== null) {
+				s.className += " object";
+				var _s;
+				try {
+					_s = "" + Object.prototype.toString.call(pVal);
+				}
+				catch(e) {
+				}
+				if(_s) {
+					if(/object (\w+)/.test(_s))
+						_s = RegExp.$1;
+					if(_s.toLowerCase() != "object")
+						t += ", " + _s;
+				}
+			}
+			s.appendChild(document.createTextNode("(" + t + ")"));
+			entry.appendChild(s);
+			entry.appendChild(document.createTextNode(" "));
+			var v = this.getLink(pVal, pVal, pNamesNew);
+			v.className = this.classes.objectValueLink;
+		}
+		entry.appendChild(v);
+		entries.appendChild(entry);
+	},
+
+	dontEnumProperties: [
+		"toString",
+		"valueOf",
+		"eval",
+		// Gecko-specific:
+		"uneval",
+		"toSource",
+		"__proto__", "__count__", "__noSuchMethod__",
+		"Components"
+	],
+	_lastObject: null,
+	parseObject: function(o, pNames) {
+		if(!o)
+			o = this.getObject(pNames);
+		if(!o)
+			return false;
+
+		var hash = this.arrayToHash(pNames);
+		this._parsedHash = hash;
+
+		var sy = o === this._lastObject // refresh
+			? window.scrollY
+			: 0;
+		this._lastObject = o;
+
+		//this.init();
+
+		if(!this.portable) {
+			location.hash = hash;
+		}
+
+		var count = 0;
+		var pVal, pNamesNew;
+		var entry, s;
+
+		var header = document.createElement("div");
+		header.id = this.ids.header;
+
+		var entries = document.createElement("div");
+		entries.id = this.ids.entries;
+
+		var _parsed = {};
+		var _unique = {};
+		try {
+			for(var p in o) {
+				++count;
+				_parsed[p] = _unique;
+				this.addEntry(entries, o, p, pNames);
+			}
+		}
+		catch(e) {
+			entry = document.createElement("div");
+			entry.className = this.classes.invalidEntry;
+			s = document.createElement("span");
+			s.className = this.classes.error;
+			s.appendChild(document.createTextNode("[iteration error]"));
+			entry.appendChild(s);
+			entries.appendChild(entry);
+		}
+		var de = this.dontEnumProperties;
+		for(var i = 0, l = de.length; i < l; ++i) {
+			var p = de[i];
+			if(!o || typeof o != "object" || !(p in o) || p in _parsed && _parsed[p] === _unique)
+				continue;
+			++count;
+			this.addEntry(entries, o, p, pNames);
+		}
+		_parsed = null;
+
+		entry = document.createElement("div");
+		entry.className = this.classes.headerEntry;
+		var _o = window;
+		for(var i = 0, l = pNames.length; i < l; ++i) {
+			var name = pNames[i];
+			var isSimple = this.isSimpleName(name);
+			try {
+				_o = _o[name];
+			}
+			catch(e) {
+				setTimeout(function() { throw new Error("Can't get " + name); }, 0);
+				break;
+			}
+			if(i != 0) {
+				var sep = document.createElement("span");
+				sep.className = this.classes.separator;
+				sep.appendChild(document.createTextNode(isSimple ? "." : ""));
+				entry.appendChild(sep);
+			}
+			var a = this.getLink(
+				isSimple
+					? name
+					: '["' + this.encodeProperty(name) + '"]',
+				_o,
+				pNames.slice(0, i + 1)
+			);
+			a.className = this.classes.objectNavigationLink;
+			entry.appendChild(a);
+		}
+		entry.appendChild(document.createTextNode(" "));
+		s = document.createElement("span");
+		s.className = this.classes.count;
+		s.appendChild(document.createTextNode("(" + count + ")"));
+		entry.appendChild(s);
+		header.appendChild(entry);
+
+		document.title = document.title.replace(/( \[.*\])?$/, " [" + this.getObjectName(pNames) + "]");
+
+		var container = document.getElementById("content");
+		while(container.hasChildNodes())
+			container.removeChild(container.lastChild);
+
+		container.appendChild(header);
+		container.appendChild(entries);
+		entries.style.paddingTop = header.offsetHeight - 10 /* body padding */ + "px";
+
+		window.scrollTo(0, sy);
+
+		return true;
+	}
+};
+
+objectsExplorer.startup();
+
+})();
+//]]>
+</script>
+
+</body>
+</html>
