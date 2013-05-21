@@ -2,7 +2,7 @@
 // version 0.3.5 - 2012-09-15
 
 // Usage:
-// new ListFilter("inpitId", "listId");
+// new ListFilter("inputId", "listId");
 // new ListFilter(input, list);
 
 function ListFilter(input, list, rowTag) {
