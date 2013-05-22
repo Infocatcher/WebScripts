@@ -7,9 +7,16 @@
 	<title>Filter test</title>
 	<style type="text/css">
 	/*<![CDATA[*/
-		html, body { margin: 0; background-color: white; }
+		html, body { margin: 0; color: black; background: white; }
 		html { padding: 0; }
-		body { padding: 8px; color: black; font: 1em Verdana,Arial,Helvetica,sans-serif; }
+		body { padding: 8px; font: 1em Verdana,Arial,Helvetica,sans-serif; }
+
+		h1 { margin: 0.3em; font-size: 1.1em; font-weight: bold; }
+		h2 { margin: 0.2em; font-size: 1em; font-weight: normal; }
+
+		:link { color: #00e; text-decoration: none; }
+		:visited { color: #551a8b; text-decoration: none; }
+		:link:hover, :visited:hover { text-decoration: underline; }
 
 		.filterHighlight { color: black; background: yellow; }
 		.jsDisabled .forJsEnabled,
@@ -24,8 +31,12 @@
 	document.body.className = "jsEnabled";
 </script>
 <div id="content">
-
-<table width="100%">
+<div id="desc">
+	<h1>Filter + highlighter</h1>
+	<h2><a href="https://github.com/Infocatcher/WebScripts/tree/master/Filter">&lt;description and source code&gt;</a></h2>
+	<a href="#data">&lt;scroll&gt;</a>
+</div>
+<table id="data" width="100%">
 	<tr>
 		<td>
 			<input id="filter" type="text" /><input class="forJsEnabled" onclick="this.previousSibling.__listFilter.reset();" type="button" value="X" />
@@ -58,6 +69,59 @@
 				<li><strong>#</strong>12345</li>
 				<li><a href="http://example.com/?qq">http://example.com/</a></li>
 				<li><a href="http://example.net/?ww">example.net</a> (zxc)</li>
+
+				<li>Lorem ipsum</li>
+				<li>dolor sit amet</li>
+				<li>consectetur adipiscing elit</li>
+				<li>Etiam lacinia</li>
+				<li>scelerisque rutrum</li>
+				<li>Morbi convallis</li>
+				<li>varius massa ac interdum</li>
+				<li>Nullam vitae lorem dolor</li>
+				<li>Aliquam aliquam lorem</li>
+				<li>sed diam mollis ultrices</li>
+				<li>Nullam pulvinar libero</li>
+				<li>at nisl porta</li>
+				<li>tempor eget ac elit</li>
+				<li>Integer euismod dictum</li>
+				<li>Nunc vitae dolor libero</li>
+				<li>Nullam vestibulum mattis</li>
+				<li>Praesent aliquet dolor</li>
+				<li>eu nisl rutrum quis</li>
+				<li>elementum odio tempus</li>
+				<li>Sed erat libero</li>
+				<li>viverra vitae imperdiet</li>
+				<li>ultricies eget lectus</li>
+				<li>Aliquam libero leo</li>
+				<li>imperdiet eget rutrum et</li>
+				<li>accumsan ac augue</li>
+				<li>Praesent ut nibh sapien</li>
+				<li>bibendum vestibulum nibh</li>
+				<li>Fusce magna lectus</li>
+				<li>eleifend quis feugiat eu</li>
+				<li>tincidunt vitae nunc</li>
+				<li>Morbi venenatis erat vel</li>
+				<li>nunc faucibus porttitor</li>
+				<li>Praesent dictum feugiat</li>
+				<li>orci ac facilisis</li>
+				<li>Duis sed pretium nibh</li>
+				<li>Proin et dolor ipsum</li>
+				<li>ut iaculis enim</li>
+				<li>Proin pulvinar lacinia</li>
+				<li>at facilisis tellus</li>
+				<li>facilisis ullamcorper</li>
+				<li>Mauris a risus nisl</li>
+				<li>sed blandit massa</li>
+				<li>Vivamus eleifend</li>
+				<li>enim ultrices placerat</li>
+				<li>justo nunc hendrerit</li>
+				<li>sit amet ornare ipsum</li>
+				<li>urna ut mauris</li>
+				<li>Aenean hendrerit congue</li>
+				<li>in commodo velit commodo</li>
+				<li>Aliquam felis nisl</li>
+				<li>facilisis quis aliquet</li>
+				<li>pharetra et elit</li>
 			</ul>
 		</td>
 		<td style="width: 50%; vertical-align: top;">
@@ -78,6 +142,21 @@
 	new ListFilter("filter", "list").focus();
 	new ListFilter("filter2", "list2");
 </script>
+
+<div id="contentHolder">
+	<p><em>Some data to test with vertical scroll…</em></p>
+	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent placerat aliquam sem id porta. Ut quis mi sit amet nulla sodales pulvinar. Suspendisse purus nisi, dapibus vitae suscipit a, consequat in lectus. Ut et hendrerit lectus. Praesent a vestibulum libero. Sed id velit at ante auctor rutrum nec suscipit risus. Suspendisse potenti. Donec vitae ante mattis enim ultricies aliquet eget vitae libero. Aenean purus urna, vehicula sit amet accumsan quis, pellentesque vitae eros. Morbi porta dui vel orci dapibus tincidunt. Nullam dignissim libero sed nibh hendrerit venenatis. Ut luctus, ante in aliquet consectetur, purus quam egestas eros, elementum rhoncus neque ligula vitae urna. Pellentesque sed ultricies ipsum. Aliquam a felis malesuada orci interdum tincidunt et et mi. Proin non risus et tortor lacinia condimentum.</p>
+	<p>Phasellus lacinia molestie est vitae ultrices. Nam congue hendrerit nisl et tempor. Quisque eu lectus ante, nec pretium odio. Quisque erat tellus, scelerisque eu dapibus egestas, feugiat a turpis. Pellentesque vitae ligula at velit egestas euismod non sit amet massa. Aliquam ac nulla et libero malesuada egestas. Sed bibendum iaculis egestas.</p>
+	<p>Integer scelerisque urna fringilla elit bibendum auctor. Sed ut cursus arcu. Fusce nulla ligula, placerat ut venenatis vitae, aliquam vitae justo. Nullam ligula magna, interdum id cursus in, sodales sed mauris. Phasellus in augue erat. Suspendisse lorem lorem, pellentesque at pharetra at, dapibus ornare nunc. Vestibulum nec ligula massa, ac accumsan odio. Maecenas at massa neque, quis interdum lectus. Proin at nisl sit amet tellus tincidunt pharetra. Vestibulum sem dolor, tincidunt at porta non, fermentum sed velit. Nulla laoreet pretium volutpat. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nunc ante lorem, ullamcorper sed malesuada non, commodo quis tellus.</p>
+	<p>Mauris sit amet sapien neque, et rutrum dolor. Phasellus dolor ante, molestie eget placerat sed, vestibulum vitae lorem. Praesent turpis enim, luctus ut consectetur eu, adipiscing a mi. Aliquam auctor, enim vel aliquet pulvinar, lacus ipsum congue urna, vel mollis augue nunc quis libero. Vestibulum bibendum, nulla sit amet elementum cursus, nulla magna mollis turpis, eget vehicula dui magna at libero. In a vestibulum lectus. Phasellus posuere velit id arcu placerat eget ultricies ligula lacinia. Nunc sit amet nisi justo. Sed ornare leo id quam vestibulum nec pellentesque justo egestas. Nam eget pulvinar tortor. Vestibulum leo sapien, aliquet sed ornare in, feugiat a ligula. Aenean aliquam accumsan dignissim. Integer auctor, sem quis pharetra porta, tortor massa varius libero, eget posuere eros nunc a sem. Phasellus vitae tortor lorem, ac consequat tortor. Pellentesque congue egestas nisl, sit amet egestas nulla congue ac.</p>
+	<p>Fusce scelerisque bibendum tristique. Nullam blandit eleifend mi, nec consequat nisi iaculis sed. Nulla dictum bibendum hendrerit. Praesent egestas sodales enim. Duis eget justo nulla, quis vestibulum est. Suspendisse dapibus malesuada massa sit amet mollis. Donec massa nunc, adipiscing eget rutrum iaculis, faucibus quis nunc. Phasellus placerat turpis in diam pharetra consectetur non ac mauris. Pellentesque eu porta augue. Sed vel mi posuere neque sodales pulvinar. Fusce ante ante, iaculis non pharetra vel, vulputate in sapien. Proin gravida, augue quis luctus porta, sapien odio fermentum dui, in auctor felis velit vel justo. Etiam lectus urna, facilisis non sollicitudin non, pulvinar lobortis justo.</p>
+	<p>Sed ullamcorper nunc sed massa consequat et mollis quam aliquet. Integer lacinia, neque ac molestie posuere, velit ante pretium nisi, vitae posuere dui nunc a enim. Vestibulum rutrum nulla eget elit vulputate hendrerit. Quisque aliquet libero in lacus rhoncus fermentum. Pellentesque consequat faucibus purus ut rhoncus. Sed fringilla pharetra augue, eu volutpat sem dictum vel. Mauris lorem ligula, tempus eget interdum a, ultricies a velit. Aliquam erat volutpat. Pellentesque a arcu diam. Fusce hendrerit turpis eu ipsum commodo placerat. Fusce tristique suscipit libero, ac dapibus justo tristique sit amet. Cras neque tellus, cursus ut malesuada eu, vulputate quis leo. Curabitur pretium ipsum a quam interdum iaculis.</p>
+	<p>Phasellus facilisis eros at lorem pharetra tempus. Nulla facilisi. Mauris sit amet nisi eros, id mattis turpis. Nullam eget massa neque, ac porta ante. Curabitur tincidunt arcu nisl. Pellentesque bibendum euismod molestie. Fusce enim libero, euismod vitae adipiscing nec, consequat vitae enim. Maecenas mattis tincidunt nunc, vel adipiscing purus placerat vel.</p>
+	<p>Sed ultricies lorem nec nibh luctus dictum. Fusce quis elit venenatis nunc dapibus varius. Quisque non mauris cursus velit mattis vehicula. Aenean non nisi odio. Donec molestie mattis risus, vel eleifend risus pulvinar nec. Vestibulum sit amet neque velit, a auctor turpis. Fusce nec libero vulputate diam aliquet viverra. Praesent vitae purus ut arcu vulputate malesuada ultricies a felis. Integer euismod porta leo vitae posuere. Nulla mattis velit a velit elementum aliquet. Cras tincidunt dolor et dui placerat nec cursus sapien sodales. Nam a risus nec sem bibendum mollis. Etiam scelerisque, purus quis hendrerit varius, enim nisi pharetra massa, eget ornare purus ipsum eget purus. Proin nec venenatis risus. Cras vel bibendum urna.</p>
+	<p>Vestibulum felis ante, elementum sed varius eget, faucibus a odio. Quisque suscipit feugiat elementum. Quisque sed magna mi, ac consectetur eros. Mauris molestie, nibh ut auctor adipiscing, diam tortor dignissim enim, a consectetur justo nulla id diam. Duis accumsan egestas diam, in sollicitudin magna luctus eu. Curabitur porta rutrum libero. Pellentesque viverra dui nec ipsum rhoncus ac porttitor purus convallis.</p>
+	<p>Ut a purus nec lectus venenatis gravida at suscipit eros. Curabitur vulputate dictum massa, luctus pellentesque elit aliquam eu. Nunc vestibulum rutrum sodales. Curabitur eget metus in neque interdum facilisis ut a ipsum. Aliquam nisi nunc, egestas nec porta vel, rhoncus et nulla. Vestibulum ac volutpat odio. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Suspendisse potenti. Etiam sagittis facilisis nunc, ut rhoncus justo ultrices ut. Morbi consequat lorem ac eros vulputate lacinia.</p>
+</div>
+
 </div>
 </body>
 </html>
