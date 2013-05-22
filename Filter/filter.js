@@ -112,24 +112,29 @@ ListFilter.prototype = {
 		if(!inpId)
 			return;
 		var filter = this._lastFilter;
-		var add = "#" + inpId + "=" + this.encode(filter);
+		var add = filter
+			? "#" + inpId + "=" + this.encode(filter)
+			: "";
 		var hash = location.hash;
-		if(!/#[^#=]+=[^#]*/.test(hash)) {
-			if(!filter)
-				return;
+		if(!/#[^#=]+=[^#]*/.test(hash))
 			hash = add;
-		}
 		else {
 			var pattern = new RegExp("#" + this.escapeRegExp(inpId) + "=[^#]*");
 			if(pattern.test(hash))
 				hash = hash.replace(pattern, add);
-			else {
-				if(!filter)
-					return;
+			else
 				hash += add;
-			}
 		}
-		location.hash = hash.replace(/^#/, "");
+		hash = hash.replace(/^#/, "");
+		if("history" in window && "pushState" in history) {
+			var loc = location.href;
+			var newLoc = loc.replace(/#.*$/, "") + (hash ? "#" : "") + hash;
+			if(newLoc != loc)
+				history.pushState("", document.title, newLoc);
+			return;
+		}
+		// Note: location.hash = "" will scroll page to top!
+		location.hash = hash || inpId + "=";
 	},
 	encode: function(s) {
 		return s
