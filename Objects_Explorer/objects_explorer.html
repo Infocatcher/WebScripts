@@ -367,14 +367,22 @@ var objectsExplorer = {
 	},
 	addEntry: function(entries, o, p, pNames, isDontEnum) {
 		var pNamesNew = pNames.concat(p);
-		var pVal, err = true;
+		var pVal, t, err = true;
 		try {
 			pVal = o[p];
+			t = typeof pVal;
 			err = false;
 		}
 		catch(e) {
 			pVal = "[access error]";
+			try {
+				t = typeof o[p];
+			}
+			catch(e2) {
+			}
 		}
+		if(!t)
+			t = "";
 
 		var entry = document.createElement("div");
 		entry.className = this.classes.entry;
@@ -417,35 +425,35 @@ var objectsExplorer = {
 		entry.appendChild(s);
 		entry.appendChild(document.createTextNode(" "));
 
+		s = document.createElement("span");
+		s.className = this.classes.objectTypeof;
+		if(t == "object" && pVal) {
+			s.className += " object";
+			var _s;
+			try {
+				_s = "" + Object.prototype.toString.call(pVal);
+			}
+			catch(e) {
+			}
+			if(_s) {
+				if(/object (\w+)/.test(_s))
+					_s = RegExp.$1;
+				if(_s.toLowerCase() != "object")
+					t += ", " + _s;
+			}
+		}
+		if(isDontEnum)
+			t += (t ? ", " : "") + "non-enumerable";
+		s.appendChild(document.createTextNode("(" + t + ")"));
+		entry.appendChild(s);
+		entry.appendChild(document.createTextNode(" "));
+
 		if(err) {
 			var v = document.createElement("span");
 			v.className = this.classes.error;
 			v.appendChild(document.createTextNode(pVal));
 		}
 		else {
-			s = document.createElement("span");
-			s.className = this.classes.objectTypeof;
-			var t = typeof pVal;
-			if(t == "object" && pVal !== null) {
-				s.className += " object";
-				var _s;
-				try {
-					_s = "" + Object.prototype.toString.call(pVal);
-				}
-				catch(e) {
-				}
-				if(_s) {
-					if(/object (\w+)/.test(_s))
-						_s = RegExp.$1;
-					if(_s.toLowerCase() != "object")
-						t += ", " + _s;
-				}
-			}
-			if(isDontEnum)
-				t += ", non-enumerable";
-			s.appendChild(document.createTextNode("(" + t + ")"));
-			entry.appendChild(s);
-			entry.appendChild(document.createTextNode(" "));
 			var v = this.getLink(pVal, pVal, pNamesNew);
 			v.className = this.classes.objectValueLink;
 		}
