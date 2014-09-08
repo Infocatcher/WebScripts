@@ -1,2 +1,2 @@
 Simple password generator.
-<br><a href="http://infocatcher.github.com/WebScripts/Password_Generator/password_generator.html">Demo</a>.
+<br><a href="http://infocatcher.github.io/WebScripts/Password_Generator/password_generator.html">Demo</a>.
