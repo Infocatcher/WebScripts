@@ -512,7 +512,14 @@ var objectsExplorer = {
 			entry.appendChild(s);
 			entries.appendChild(entry);
 		}
-		if(o && typeof o == "object") {
+		var likeObj = false;
+		if(o) try {
+			"" in o;
+			likeObj = true;
+		}
+		catch(e) {
+		}
+		if(likeObj) {
 			var de = this.dontEnumProperties;
 			if("getOwnPropertyNames" in Object && "getPrototypeOf" in Object) {
 				de = [];
