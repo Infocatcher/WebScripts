@@ -367,13 +367,14 @@ var objectsExplorer = {
 	},
 	addEntry: function(entries, o, p, pNames, isDontEnum) {
 		var pNamesNew = pNames.concat(p);
-		var pVal, t, err = true;
+		var pVal, t;
+		var err = null;
 		try {
 			pVal = o[p];
 			t = typeof pVal;
-			err = false;
 		}
 		catch(e) {
+			err = e;
 			pVal = "[access error]";
 			try {
 				t = typeof o[p];
@@ -452,6 +453,7 @@ var objectsExplorer = {
 			var v = document.createElement("span");
 			v.className = this.classes.error;
 			v.appendChild(document.createTextNode(pVal));
+			v.title = err;
 		}
 		else {
 			var v = this.getLink(pVal, pVal, pNamesNew);
