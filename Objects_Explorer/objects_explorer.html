@@ -519,7 +519,7 @@ var objectsExplorer = {
 		}
 		catch(e) {
 		}
-		if(likeObj) {
+		if(likeObj) try {
 			var de = this.dontEnumProperties;
 			if("getOwnPropertyNames" in Object && "getPrototypeOf" in Object) {
 				de = [];
@@ -535,6 +535,10 @@ var objectsExplorer = {
 				++count;
 				this.addEntry(entries, o, p, pNames, true);
 			}
+			de = null;
+		}
+		catch(safeErr) {
+			setTimeout(function() { throw safeErr; }, 0);
 		}
 		_parsed = null;
 
