@@ -426,8 +426,6 @@ var objectsExplorer = {
 		entry.appendChild(s);
 		entry.appendChild(document.createTextNode(" "));
 
-		s = document.createElement("span");
-		s.className = this.classes.objectTypeof;
 		if(t == "object" && pVal) {
 			s.className += " object";
 			var _s;
@@ -445,9 +443,13 @@ var objectsExplorer = {
 		}
 		if(isDontEnum)
 			t += (t ? ", " : "") + "non-enumerable";
-		s.appendChild(document.createTextNode("(" + t + ")"));
-		entry.appendChild(s);
-		entry.appendChild(document.createTextNode(" "));
+		if(t) {
+			s = document.createElement("span");
+			s.className = this.classes.objectTypeof;
+			s.appendChild(document.createTextNode("(" + t + ")"));
+			entry.appendChild(s);
+			entry.appendChild(document.createTextNode(" "));
+		}
 
 		if(err) {
 			var v = document.createElement("span");
