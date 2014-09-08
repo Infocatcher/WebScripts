@@ -365,7 +365,7 @@ var objectsExplorer = {
 		}
 		return o;
 	},
-	addEntry: function(entries, o, p, pNames) {
+	addEntry: function(entries, o, p, pNames, isDontEnum) {
 		var pNamesNew = pNames.concat(p);
 		var pVal, err = true;
 		try {
@@ -441,6 +441,8 @@ var objectsExplorer = {
 						t += ", " + _s;
 				}
 			}
+			if(isDontEnum)
+				t += ", non-enumerable";
 			s.appendChild(document.createTextNode("(" + t + ")"));
 			entry.appendChild(s);
 			entry.appendChild(document.createTextNode(" "));
@@ -517,7 +519,7 @@ var objectsExplorer = {
 				if(!(p in o) || p in _parsed && _parsed[p] === _unique)
 					continue;
 				++count;
-				this.addEntry(entries, o, p, pNames);
+				this.addEntry(entries, o, p, pNames, true);
 			}
 		}
 		_parsed = null;
