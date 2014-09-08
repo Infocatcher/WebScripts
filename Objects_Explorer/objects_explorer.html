@@ -514,10 +514,17 @@ var objectsExplorer = {
 		}
 		if(o && typeof o == "object") {
 			var de = this.dontEnumProperties;
+			if("getOwnPropertyNames" in Object && "getPrototypeOf" in Object) {
+				de = [];
+				for(var _o = o; _o; _o = Object.getPrototypeOf(_o))
+					de.push.apply(de, Object.getOwnPropertyNames(_o));
+				de.push.apply(de, this.dontEnumProperties);
+			}
 			for(var i = 0, l = de.length; i < l; ++i) {
 				var p = de[i];
 				if(!(p in o) || p in _parsed && _parsed[p] === _unique)
 					continue;
+				_parsed[p] = _unique;
 				++count;
 				this.addEntry(entries, o, p, pNames, true);
 			}
