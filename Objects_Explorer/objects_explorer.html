@@ -498,6 +498,14 @@ var objectsExplorer = {
 			: 0;
 		this._lastObject = o;
 
+		// Trick: primitives aren't iterable, so will create object wrapper (that's how them works internally)
+		var t = typeof o;
+		if(t == "boolean" || t == "number" || t == "string") try {
+			o = new o.constructor(o);
+		}
+		catch(e) {
+		}
+
 		//this.init();
 
 		if(!this.portable) {
