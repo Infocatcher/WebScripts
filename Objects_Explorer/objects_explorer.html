@@ -2,12 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="content-type" content="application/xhtml+xml; charset=utf-8" />
-	<title>Objects Explorer 0.1.0b4</title>
-	<meta name="copyright" content="&copy; Infocatcher 2008, 2010-2012"/>
+	<title>Objects Explorer 0.1.0b5</title>
+	<meta name="copyright" content="&copy; Infocatcher 2008, 2010-2012, 2014"/>
 	<meta name="author" content="Infocatcher" />
-	<!-- version: 0.1.0b4 - 2012-09-24 -->
-	<!-- [2010-08-27] Bug: javascript: window["0/1"] = 2; void 0; [fixed: 2010-10-11] -->
-	<!-- [2010-10-11] Bug: \ in URI threated as / [fixed: 2011-12-02] -->
+	<!--
+		version: 0.1.0b5 - 2014-09-09
+		https://github.com/Infocatcher/WebScripts/tree/master/Objects_Explorer
+	-->
 	<style type="text/css">
 	/*<![CDATA[*/
 		html { padding: 0; margin: 0; }
@@ -60,16 +61,6 @@
 
 <script type="text/javascript">
 //<![CDATA[
-
-/*
-var __x = {
-	a: { b: 0 },
-	b: 1
-};
-window["00\\000/.\"1"] = { x: __x };
-window["0\"1"] = { x: __x };
-window[".x[\"y\"]"] = { x: __x };
-*/
 
 (function() {
 
@@ -166,6 +157,7 @@ var objectsExplorer = {
 		objectName: "objectName",
 		equalMark: "equalMark",
 		objectTypeof: "objectTypeof",
+		objectValue: "objectValue",
 		objectValueLink: "objectValueLink",
 
 		sourceContainer: "sourceContainer",
@@ -301,8 +293,11 @@ var objectsExplorer = {
 			.replace(/"/g, '\\"');
 	},
 	getLink: function(pVal, o, pNames) {
+		var isExplorable = o !== null && o !== undefined;
+
 		var a = document.createElement("a");
-		a.href = "#" + this.arrayToHash(pNames);
+		if(isExplorable)
+			a.href = "#" + this.arrayToHash(pNames);
 		var text;
 		try {
 			text = "" + pVal;
@@ -333,6 +328,8 @@ var objectsExplorer = {
 				text = "[empty]";
 		}
 		a.appendChild(document.createTextNode(text));
+		if(!isExplorable)
+			return a;
 		a.__o = o;
 		a.__pNames = pNames;
 		var _this = this;
@@ -365,16 +362,25 @@ var objectsExplorer = {
 		}
 		return o;
 	},
-	addEntry: function(entries, o, p, pNames) {
+	addEntry: function(entries, o, p, pNames, isDontEnum) {
 		var pNamesNew = pNames.concat(p);
-		var pVal, err = true;
+		var pVal, t;
+		var err = null;
 		try {
 			pVal = o[p];
-			err = false;
+			t = typeof pVal;
 		}
 		catch(e) {
+			err = e;
 			pVal = "[access error]";
+			try {
+				t = typeof o[p];
+			}
+			catch(e2) {
+			}
 		}
+		if(!t)
+			t = "";
 
 		var entry = document.createElement("div");
 		entry.className = this.classes.entry;
@@ -417,35 +423,42 @@ var objectsExplorer = {
 		entry.appendChild(s);
 		entry.appendChild(document.createTextNode(" "));
 
+		if(t == "object" && pVal) {
+			s.className += " object";
+			var _s;
+			try {
+				_s = "" + Object.prototype.toString.call(pVal);
+			}
+			catch(e) {
+			}
+			if(_s) {
+				if(/object (\w+)/.test(_s))
+					_s = RegExp.$1;
+				if(_s.toLowerCase() != "object")
+					t += ", " + _s;
+			}
+		}
+		if(isDontEnum)
+			t += (t ? ", " : "") + "non-enumerable";
+		if(t) {
+			s = document.createElement("span");
+			s.className = this.classes.objectTypeof;
+			s.appendChild(document.createTextNode("(" + t + ")"));
+			entry.appendChild(s);
+			entry.appendChild(document.createTextNode(" "));
+		}
+
 		if(err) {
 			var v = document.createElement("span");
 			v.className = this.classes.error;
 			v.appendChild(document.createTextNode(pVal));
+			v.title = err;
 		}
 		else {
-			s = document.createElement("span");
-			s.className = this.classes.objectTypeof;
-			var t = typeof pVal;
-			if(t == "object" && pVal !== null) {
-				s.className += " object";
-				var _s;
-				try {
-					_s = "" + Object.prototype.toString.call(pVal);
-				}
-				catch(e) {
-				}
-				if(_s) {
-					if(/object (\w+)/.test(_s))
-						_s = RegExp.$1;
-					if(_s.toLowerCase() != "object")
-						t += ", " + _s;
-				}
-			}
-			s.appendChild(document.createTextNode("(" + t + ")"));
-			entry.appendChild(s);
-			entry.appendChild(document.createTextNode(" "));
 			var v = this.getLink(pVal, pVal, pNamesNew);
-			v.className = this.classes.objectValueLink;
+			v.className = v.href
+				? this.classes.objectValueLink
+				: this.classes.objectValue;
 		}
 		entry.appendChild(v);
 		entries.appendChild(entry);
@@ -465,8 +478,8 @@ var objectsExplorer = {
 	parseObject: function(o, pNames) {
 		if(!o)
 			o = this.getObject(pNames);
-		if(!o)
-			return false;
+		//if(!o)
+		//	return false;
 
 		var hash = this.arrayToHash(pNames);
 		this._parsedHash = hash;
@@ -475,6 +488,14 @@ var objectsExplorer = {
 			? window.scrollY
 			: 0;
 		this._lastObject = o;
+
+		// Trick: primitives aren't iterable, so will create object wrapper (that's how them works internally)
+		var t = typeof o;
+		if(t == "boolean" || t == "number" || t == "string") try {
+			o = new o.constructor(o);
+		}
+		catch(e) {
+		}
 
 		//this.init();
 
@@ -510,13 +531,33 @@ var objectsExplorer = {
 			entry.appendChild(s);
 			entries.appendChild(entry);
 		}
-		var de = this.dontEnumProperties;
-		for(var i = 0, l = de.length; i < l; ++i) {
-			var p = de[i];
-			if(!o || typeof o != "object" || !(p in o) || p in _parsed && _parsed[p] === _unique)
-				continue;
-			++count;
-			this.addEntry(entries, o, p, pNames);
+		var likeObj = false;
+		if(o) try {
+			"" in o;
+			likeObj = true;
+		}
+		catch(e) {
+		}
+		if(likeObj) try {
+			var de = this.dontEnumProperties;
+			if("getOwnPropertyNames" in Object && "getPrototypeOf" in Object) {
+				de = [];
+				for(var _o = o; _o; _o = Object.getPrototypeOf(_o))
+					de.push.apply(de, Object.getOwnPropertyNames(_o));
+				de.push.apply(de, this.dontEnumProperties);
+			}
+			for(var i = 0, l = de.length; i < l; ++i) {
+				var p = de[i];
+				if(!(p in o) || p in _parsed && _parsed[p] === _unique)
+					continue;
+				_parsed[p] = _unique;
+				++count;
+				this.addEntry(entries, o, p, pNames, true);
+			}
+			de = null;
+		}
+		catch(safeErr) {
+			setTimeout(function() { throw safeErr; }, 0);
 		}
 		_parsed = null;
 
