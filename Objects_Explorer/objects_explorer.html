@@ -166,6 +166,7 @@ var objectsExplorer = {
 		objectName: "objectName",
 		equalMark: "equalMark",
 		objectTypeof: "objectTypeof",
+		objectValue: "objectValue",
 		objectValueLink: "objectValueLink",
 
 		sourceContainer: "sourceContainer",
@@ -301,8 +302,11 @@ var objectsExplorer = {
 			.replace(/"/g, '\\"');
 	},
 	getLink: function(pVal, o, pNames) {
+		var isExplorable = o !== null && o !== undefined;
+
 		var a = document.createElement("a");
-		a.href = "#" + this.arrayToHash(pNames);
+		if(isExplorable)
+			a.href = "#" + this.arrayToHash(pNames);
 		var text;
 		try {
 			text = "" + pVal;
@@ -333,6 +337,8 @@ var objectsExplorer = {
 				text = "[empty]";
 		}
 		a.appendChild(document.createTextNode(text));
+		if(!isExplorable)
+			return a;
 		a.__o = o;
 		a.__pNames = pNames;
 		var _this = this;
@@ -459,7 +465,9 @@ var objectsExplorer = {
 		}
 		else {
 			var v = this.getLink(pVal, pVal, pNamesNew);
-			v.className = this.classes.objectValueLink;
+			v.className = v.href
+				? this.classes.objectValueLink
+				: this.classes.objectValue;
 		}
 		entry.appendChild(v);
 		entries.appendChild(entry);
